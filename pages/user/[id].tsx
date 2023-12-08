@@ -1,69 +1,66 @@
-import { Alert, Box, Flex, Heading, SimpleGrid, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
-import { useRouter } from "next/router";
-import useSWR from "swr";
+import { Link, Flex, Box, Text, SimpleGrid, Heading } from "@chakra-ui/react";
+import { GetServerSideProps, NextPage } from "next";
+import fetch from "node-fetch";
+import ErrorPage from "next/error";
+
 type Data = {
   id: string;
   name: string;
   email: string;
 };
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw Error("Yo that's NOT OK!!!");
-  }
-  const data: Data = await res.json();
-  return data;
-};
-
-const UserData = () => {
-  const router = useRouter();
-  const { id } = router.query;
-  const result = useSWR(`/api/user/${id}`, fetcher);
-  const data: Data = result.data;
-  const error: Error = result.error;
-
-  if (error) {
-    return <Alert status="error">Loading failed: {error.message}</Alert>;
+const UserPage: NextPage<{ data: Data }> = (props) => {
+  if (!props.data) {
+    return <ErrorPage statusCode={404} />;
   }
 
-  if (!data) {
-    return <Alert status="info">Loading...</Alert>;
-  }
-
-  return (
-    <SimpleGrid columns={2} width="2xs" spacingY={4}>
-      <Text fontWeight="bold" marginRight={4}>
-        UserID
-      </Text>
-      <Text>{data.id}</Text>
-
-      <Text fontWeight="bold" marginRight={4}>
-        Name
-      </Text>
-      <Text>{data.name}</Text>
-
-      <Text fontWeight="bold" marginRight={4}>
-        Email
-      </Text>
-      <Text>{data.email}</Text>
-    </SimpleGrid>
-  );
-};
-
-const UserPage = () => {
   return (
     <Box>
       <Flex flexDirection="column" alignItems="center">
         <Heading marginY="2rem">User</Heading>
-        <UserData />
+        <SimpleGrid columns={2} width="2xs" spacingY={4}>
+          <Text fontWeight="bold" marginRight={4}>
+            UserID
+          </Text>
+          <Text>{props.data.id}</Text>
+
+          <Text fontWeight="bold" marginRight={4}>
+            Name
+          </Text>
+          <Text>{props.data.name}</Text>
+
+          <Text fontWeight="bold" marginRight={4}>
+            Email
+          </Text>
+          <Text>{props.data.email}</Text>
+        </SimpleGrid>
         <NextLink href="/">
           <Text fontStyle="italic">Go back home</Text>
         </NextLink>
       </Flex>
     </Box>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async ({
+  params,
+  res,
+}) => {
+  try {
+    const { id } = params;
+    const result = await fetch(`http://localhost:3000/api/user/${id}`);
+    const data: Data = (await result.json()) as Data;
+
+    return {
+      props: { data },
+    };
+  } catch {
+    res.statusCode = 404;
+    return {
+      props: {},
+    };
+  }
 };
 
 export default UserPage;
