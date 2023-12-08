@@ -6,9 +6,7 @@ const IndexPage: NextPage = () => {
   return (
     <>
       <h1>Hello World</h1>
-      <NextLink href="/about">
-        <Link>About</Link>
-      </NextLink>
+      <NextLink href="/about">About</NextLink>
     </>
   );
 };

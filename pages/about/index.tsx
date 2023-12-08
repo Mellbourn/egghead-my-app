@@ -8,9 +8,7 @@ const AboutPage: NextPage = () => {
       <Heading as="h1" size="2xl" marginY="2rem">
         This is ABOUT page
       </Heading>
-      <NextLink href="/">
-        <Link>Home</Link>
-      </NextLink>
+      <NextLink href="/">Home</NextLink>
     </Flex>
   );
 };
